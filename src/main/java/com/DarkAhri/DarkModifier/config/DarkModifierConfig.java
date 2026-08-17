@@ -69,12 +69,17 @@ public class DarkModifierConfig {
                 "General settings for DarkModifier. Changes here apply immediately if supported; some options may require a restart.");
         // Set a language key for the category so it can be localized via lang files
         try {
-            config.getCategory(CATEGORY_GENERAL).setLanguageKey("darkmodifier.config.category.general");
+            config.getCategory(CATEGORY_GENERAL)
+                .setLanguageKey("darkmodifier.config.category.general");
         } catch (Exception ignored) {}
 
-        // Create or get the property so we can set a language key and a comment (tooltip will be generated from langKey + ".tooltip")
-        net.minecraftforge.common.config.Property prop = config.get(CATEGORY_GENERAL, "queenWorkCycleThrottleIncrement", Integer.toString(DEFAULT_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT));
-        prop.setComment("Amount added to queenWorkCycleThrottle each tick when the queen works. Increase to speed up bee work cycles; set too high may affect gameplay balance.");
+        // Create or get the property so we can set a language key and a comment (tooltip will be generated from langKey
+        // + ".tooltip")
+        net.minecraftforge.common.config.Property prop = config.get(
+            CATEGORY_GENERAL,
+            "queenWorkCycleThrottleIncrement",
+            Integer.toString(DEFAULT_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT));
+        prop.comment = "Amount added to queenWorkCycleThrottle each tick when the queen works. Increase to speed up bee work cycles; set too high may affect gameplay balance.";
         prop.setLanguageKey("darkmodifier.config.queenWorkCycleThrottleIncrement");
         int value = prop.getInt(DEFAULT_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT);
 
