@@ -1,0 +1,7 @@
+# Chinese localization for DarkModifier
+# Category title
+darkmodifier.config.category.general=常规设置
+
+# Property: queenWorkCycleThrottleIncrement
+darkmodifier.config.queenWorkCycleThrottleIncrement=蜂后工作周期节流增量
+darkmodifier.config.queenWorkCycleThrottleIncrement.tooltip=每次蜂后工作时增加到 queenWorkCycleThrottle 的数值。增大可以加速蜜蜂工作周期，但设置过高可能破坏游戏平衡。

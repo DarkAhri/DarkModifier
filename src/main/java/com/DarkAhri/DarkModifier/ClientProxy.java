@@ -2,7 +2,14 @@ package com.DarkAhri.DarkModifier;
 
 public class ClientProxy extends CommonProxy {
 
-    // Override CommonProxy methods here, if you want a different behaviour on the client (e.g. registering renders).
-    // Don't forget to call the super methods as well.
+    /**
+     * Client-side initialization. Keep client-specific registrations (renderers, key bindings) here.
+     * Calls through to super to ensure shared initialization happens.
+     */
+    @Override
+    public void preInit(cpw.mods.fml.common.event.FMLPreInitializationEvent event) {
+        super.preInit(event);
+        // TODO: register client-side renderers and handlers
+    }
 
 }
