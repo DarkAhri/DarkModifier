@@ -14,6 +14,6 @@ public class MixinTileEntityCropSticks {
         constant = @Constant(intValue = 256),
         remap = true)
     private int modifyTickRateInUpdateEntity(int original) {
-        return 16;
+        return com.DarkAhri.DarkModifier.config.DarkModifierConfig.getCropMixinTickRate();
     }
 }

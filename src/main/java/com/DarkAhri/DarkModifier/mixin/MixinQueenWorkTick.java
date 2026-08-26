@@ -19,6 +19,6 @@ public class MixinQueenWorkTick {
 
     @Inject(method = "queenWorkTick", at = @At("TAIL"), remap = false)
     private void queenWorkTick(IBee queen, CallbackInfo ci) {
-        queenWorkCycleThrottle += DarkModifierConfig.queenWorkCycleThrottleIncrement;
+        queenWorkCycleThrottle += DarkModifierConfig.getQueenWorkCycleThrottleIncrement();
     }
 }
