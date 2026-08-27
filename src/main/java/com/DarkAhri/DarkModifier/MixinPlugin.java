@@ -21,6 +21,7 @@ public class MixinPlugin implements ILateMixinLoader {
         mixins.add("MixinQueenWorkTick");
         mixins.add("MixinTileEntityCropSticks");
         mixins.add("MixinMTEIndustrialFarm");
+        mixins.add("MixinMTEIndustrialApiary");
         return mixins;
     }
 }
