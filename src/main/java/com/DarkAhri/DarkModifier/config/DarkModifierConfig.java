@@ -1,34 +1,36 @@
 package com.DarkAhri.DarkModifier.config;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import net.minecraftforge.common.config.Configuration;
 
 import com.DarkAhri.DarkModifier.DarkModifier;
 
-/**
- * Configuration holder for DarkModifier module.
- *
- * Responsibilities:
- * - Provide defaults
- * - Load persisted config from disk
- * - Validate and expose configuration values through accessors
- */
 public class DarkModifierConfig {
 
     public static final String CATEGORY_GENERAL = "general";
 
+    private static final String LANG_PREFIX = DarkModifier.MODID + ".config.";
+
     private static final int DEFAULT_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT = 55;
     private static final int MIN_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT = 1;
     private static final int MAX_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT = 550;
+    private static final String COMMENT_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT = "每个蜂后工作周期累加到 queenWorkCycleThrottle 的数值（直接替换 Forestry 原版每 tick 自增 1），"
+        + "同时也是 GT 工业蜂房周期长度常量的除数。数值越大产出越快：原版需 550 tick 产出一次，设为 55 则约 10 tick 一次。允许范围 1 到 550。";
+
+    private static final int DEFAULT_CROP_MIXIN_TICK_RATE = 16;
+    private static final int MIN_CROP_MIXIN_TICK_RATE = 1;
+    private static final int MAX_CROP_MIXIN_TICK_RATE = 256;
+    private static final String COMMENT_CROP_MIXIN_TICK_RATE = "作物基准周期（tick）。替换 CropsNH 作物架的 256 tick 周期，"
+        + "工业农场按其等比换算。数值越小作物越快：默认 16 约为原版 16 倍速，设为 256 等同原版。允许范围 1 到 256。";
+
+    private static final long REFRESH_INTERVAL_NANOS = TimeUnit.SECONDS.toNanos(5);
 
     private static volatile DarkModifierConfig instance;
-
-    // Backing field for the config value. Access via getter to keep encapsulation.
     private static volatile int queenWorkCycleThrottleIncrement = DEFAULT_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT;
-
-    // New crop mixin configuration
-    private static volatile int cropMixinTickRate = 16;
+    private static volatile int cropMixinTickRate = DEFAULT_CROP_MIXIN_TICK_RATE;
+    private static volatile long lastCheckNanos = System.nanoTime();
 
     private final File configFile;
     private final Configuration config;
@@ -51,19 +53,20 @@ public class DarkModifierConfig {
 
     public static synchronized void reload() {
         if (instance != null) {
-            instance.loadConfig();
+            instance.applyValues();
         }
     }
 
     public static synchronized void reloadIfChanged() {
-        if (instance == null || instance.configFile == null || !instance.configFile.exists()) {
+        DarkModifierConfig current = instance;
+        if (current == null || current.configFile == null || !current.configFile.exists()) {
             return;
         }
 
-        long currentTimestamp = instance.configFile.lastModified();
-        long currentSize = instance.configFile.length();
-        if (currentTimestamp != instance.lastLoadedTimestamp || currentSize != instance.lastLoadedSize) {
-            instance.loadConfig();
+        long currentTimestamp = current.configFile.lastModified();
+        long currentSize = current.configFile.length();
+        if (currentTimestamp != current.lastLoadedTimestamp || currentSize != current.lastLoadedSize) {
+            current.loadConfig();
         }
     }
 
@@ -75,75 +78,83 @@ public class DarkModifierConfig {
 
     private void loadConfig() {
         config.load();
+        applyValues();
+    }
 
-        // Set a human-readable comment for the category that will be shown in the GUI as a subtitle
-        config.getCategory(CATEGORY_GENERAL)
-            .setComment(
-                "General settings for DarkModifier. Changes here apply immediately if supported; some options may require a restart.");
-        // Set a language key for the category so it can be localized via lang files
-        try {
-            config.getCategory(CATEGORY_GENERAL)
-                .setLanguageKey("darkmodifier.config.category.general");
-        } catch (Exception ignored) {}
+    /**
+     * Applies the current in-memory {@code Property} values to the cached static fields and saves when anything
+     * changed. Unlike {@link #loadConfig()}, this deliberately does not read the file back from disk: it is invoked
+     * right after the config GUI committed edits, and re-reading would discard them.
+     */
+    private void applyValues() {
+        readValues();
 
-        // Create or get the property so we can set a language key and a comment (tooltip will be generated from langKey
-        // + ".tooltip")
-        net.minecraftforge.common.config.Property prop = config.get(
-            CATEGORY_GENERAL,
-            "queenWorkCycleThrottleIncrement",
-            Integer.toString(DEFAULT_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT));
-        prop.comment = "Amount added to queenWorkCycleThrottle each tick when the queen works. Increase to speed up bee work cycles; set too high may affect gameplay balance.";
-        prop.setLanguageKey("darkmodifier.config.queenWorkCycleThrottleIncrement");
-        int value = prop.getInt(DEFAULT_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT);
-
-        setQueenWorkCycleThrottleIncrement(value);
-
-        // Crop mixins: tick rate (mixins are always enabled)
-        net.minecraftforge.common.config.Property cropTickProp = config
-            .get(CATEGORY_GENERAL, "cropMixinTickRate", Integer.toString(16));
-        cropTickProp.comment = "Tick rate used by crop mixins when modifying crop tick constants. Lower value = faster ticks.";
-        cropTickProp.setLanguageKey("darkmodifier.config.cropMixinTickRate");
-        cropMixinTickRate = cropTickProp.getInt(16);
-
-        lastLoadedTimestamp = configFile.lastModified();
-        lastLoadedSize = configFile.length();
-
+        updateLoadedState();
         if (config.hasChanged()) {
             config.save();
-            lastLoadedTimestamp = configFile.lastModified();
-            lastLoadedSize = configFile.length();
+            updateLoadedState();
         }
     }
 
-    private static synchronized void setQueenWorkCycleThrottleIncrement(int value) {
-        if (value < MIN_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT) {
-            queenWorkCycleThrottleIncrement = MIN_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT;
-        } else if (value > MAX_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT) {
-            queenWorkCycleThrottleIncrement = MAX_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT;
-        } else {
-            queenWorkCycleThrottleIncrement = value;
-        }
+    private void readValues() {
+        config.getCategory(CATEGORY_GENERAL)
+            .setLanguageKey(LANG_PREFIX + "category.general");
+
+        queenWorkCycleThrottleIncrement = readConfigInt(
+            "queenWorkCycleThrottleIncrement",
+            DEFAULT_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT,
+            MIN_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT,
+            MAX_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT,
+            COMMENT_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT);
+
+        cropMixinTickRate = readConfigInt(
+            "cropMixinTickRate",
+            DEFAULT_CROP_MIXIN_TICK_RATE,
+            MIN_CROP_MIXIN_TICK_RATE,
+            MAX_CROP_MIXIN_TICK_RATE,
+            COMMENT_CROP_MIXIN_TICK_RATE);
     }
 
-    // refreshFromConfigurationIfAvailable removed — reloadIfChanged/loadConfig handles live updates.
+    private int readConfigInt(String key, int defaultValue, int minValue, int maxValue, String comment) {
+        net.minecraftforge.common.config.Property property = config
+            .get(CATEGORY_GENERAL, key, defaultValue, comment, minValue, maxValue);
+        property.setLanguageKey(LANG_PREFIX + key);
+        // Forge does not enforce the bounds on load, so clamp them here as well.
+        return Math.max(minValue, Math.min(maxValue, property.getInt(defaultValue)));
+    }
+
+    private void updateLoadedState() {
+        lastLoadedTimestamp = configFile.lastModified();
+        lastLoadedSize = configFile.length();
+    }
+
+    /**
+     * Rate-limits the file based change detection. The getters are called from mixins on the tile entity tick, so doing
+     * any file I/O there would be too costly; instead the check runs at most once per refresh interval, leaving the
+     * hot path with just a couple of volatile reads.
+     * <p>
+     * {@link System#nanoTime()} is used deliberately: it is monotonic and therefore immune to clock adjustments that
+     * would either disable the throttle entirely or make it stop firing.
+     */
+    private static void maybeRefresh() {
+        long now = System.nanoTime();
+        if (now - lastCheckNanos < REFRESH_INTERVAL_NANOS) {
+            return;
+        }
+        lastCheckNanos = now;
+        reloadIfChanged();
+    }
 
     public static int getQueenWorkCycleThrottleIncrement() {
-        // Check timestamp and reload config if file changed; loadConfig takes care of validation
-        reloadIfChanged();
+        maybeRefresh();
         return queenWorkCycleThrottleIncrement;
     }
 
-    /**
-     * Returns the configured tick rate used by crop mixins.
-     */
     public static int getCropMixinTickRate() {
-        reloadIfChanged();
+        maybeRefresh();
         return cropMixinTickRate;
     }
 
-    /**
-     * Returns the underlying Forge Configuration instance for advanced use.
-     */
     public Configuration getConfig() {
         return config;
     }

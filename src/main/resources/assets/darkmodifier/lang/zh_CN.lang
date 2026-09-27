@@ -1,11 +1,12 @@
 # Chinese localization for DarkModifier
+#
+# Forge 1.7.10 GuiConfig only resolves language keys for entry NAMES (see ListEntryBase, which calls
+# I18n.format(IConfigElement.getLanguageKey())). Tooltip text comes straight from Property.comment and is never
+# translated, so those strings live in DarkModifierConfig as Chinese comments instead of here.
+
 # Category title
 darkmodifier.config.category.general=常规设置
 
-# Property: queenWorkCycleThrottleIncrement
+# Entry names
 darkmodifier.config.queenWorkCycleThrottleIncrement=蜂后工作周期节流增量
-darkmodifier.config.queenWorkCycleThrottleIncrement.tooltip=每次蜂后工作时增加到 queenWorkCycleThrottle 的数值。增大可以加速蜜蜂工作周期，但设置过高可能破坏游戏平衡。
-
-# Crop mixins configuration
-darkmodifier.config.cropMixinTickRate=作物 Mixin 计时器速率
-darkmodifier.config.cropMixinTickRate.tooltip=用于替换作物相关类中的常量的计时率值。较小的值会使作物行为更快。默认值 16.
+darkmodifier.config.cropMixinTickRate=作物基准周期（Tick）

@@ -18,10 +18,18 @@ public class MixinPlugin implements ILateMixinLoader {
     @Override
     public List<String> getMixins(Set<String> loadedMods) {
         List<String> mixins = new ArrayList<>();
-        mixins.add("MixinQueenWorkTick");
-        mixins.add("MixinTileEntityCropSticks");
-        mixins.add("MixinMTEIndustrialFarm");
-        mixins.add("MixinMTEIndustrialApiary");
+
+        if (loadedMods.contains("Forestry")) {
+            mixins.add("MixinQueenWorkTick");
+        }
+        if (loadedMods.contains("cropsnh")) {
+            mixins.add("MixinTileEntityCropSticks");
+            mixins.add("MixinMTEIndustrialFarm");
+        }
+        if (loadedMods.contains("gregtech")) {
+            mixins.add("MixinMTEIndustrialApiary");
+        }
+
         return mixins;
     }
 }
