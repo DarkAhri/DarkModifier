@@ -26,6 +26,10 @@ import gregtech.common.tileentities.machines.basic.MTEIndustrialApiary;
  * below 100 ticks it evaluates to 0 and the machine throws {@code ArithmeticException} every time it starts a recipe.
  * Replacing it with {@code / 1} keeps the divisor at least 1, removing both the crash and GregTech's built-in 100 tick
  * floor so the machine can actually run faster than that.
+ * <p>
+ * When the feature is switched off via the client keybinding, this mixin restores vanilla behavior: the cycle base
+ * goes back to {@code 550.0f} (the config getter then yields the vanilla increment {@code 1}) and the {@code / 100}
+ * floor is re-applied.
  */
 @Mixin(value = MTEIndustrialApiary.class, remap = false)
 public class MixinMTEIndustrialApiary {
@@ -37,6 +41,7 @@ public class MixinMTEIndustrialApiary {
 
     @ModifyConstant(method = "checkRecipe", constant = @Constant(intValue = 100, ordinal = 0), remap = false)
     private int removeMinimumCycleFloor(int original) {
-        return 1;
+        // 1 while speedups are active (removes the 100 tick floor); 100 when switched off to keep vanilla behavior.
+        return DarkModifierConfig.isEnabled() ? 1 : 100;
     }
 }

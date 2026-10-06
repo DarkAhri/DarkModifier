@@ -1,20 +1,20 @@
-# Chinese localization for DarkModifier
+# English localization for DarkModifier
 #
 # Forge 1.7.10 GuiConfig only resolves language keys for entry NAMES (see ListEntryBase, which calls
 # I18n.format(IConfigElement.getLanguageKey())). Tooltip text comes straight from Property.comment and is never
 # translated, so those strings live in DarkModifierConfig as Chinese comments instead of here.
 
 # Category title
-darkmodifier.config.category.general=常规设置
+darkmodifier.config.category.general=General
 
 # Entry names
-darkmodifier.config.queenWorkCycleThrottleIncrement=蜂后工作周期节流增量
-darkmodifier.config.cropMixinTickRate=作物基准周期（Tick）
+darkmodifier.config.queenWorkCycleThrottleIncrement=Queen work cycle throttle increment
+darkmodifier.config.cropMixinTickRate=Crop base cycle (ticks)
 
 # Keybinding (Options -> Key Binds, shown under the DarkModifier category)
 key.categories.darkmodifier=DarkModifier
-key.darkmodifier.toggle=切换加速开关
+key.darkmodifier.toggle=Toggle speedups
 
 # Chat feedback on toggle
-darkmodifier.message.toggled_on=DarkModifier 加速已开启
-darkmodifier.message.toggled_off=DarkModifier 加速已关闭，生产恢复原版速度
+darkmodifier.message.toggled_on=DarkModifier speedups enabled
+darkmodifier.message.toggled_off=DarkModifier speedups disabled, production runs at vanilla speed

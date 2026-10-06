@@ -32,6 +32,10 @@ public class DarkModifierConfig {
     private static volatile int cropMixinTickRate = DEFAULT_CROP_MIXIN_TICK_RATE;
     private static volatile long lastCheckNanos = System.nanoTime();
 
+    // Runtime speedup switch flipped by the client keybinding. Deliberately not persisted: the mod always starts
+    // enabled, so an in-game toggle never surprises the player on the next launch.
+    private static volatile boolean enabled = true;
+
     private final File configFile;
     private final Configuration config;
     private long lastLoadedTimestamp;
@@ -145,14 +149,34 @@ public class DarkModifierConfig {
         reloadIfChanged();
     }
 
+    /**
+     * Returns the effective throttle increment, or the vanilla value ({@code 1}) while speedups are switched off via
+     * the client keybinding.
+     */
     public static int getQueenWorkCycleThrottleIncrement() {
         maybeRefresh();
-        return queenWorkCycleThrottleIncrement;
+        return enabled ? queenWorkCycleThrottleIncrement : MIN_QUEEN_WORK_CYCLE_THROTTLE_INCREMENT;
     }
 
+    /**
+     * Returns the effective crop tick rate, or the vanilla value ({@code 256}) while speedups are switched off via
+     * the client keybinding.
+     */
     public static int getCropMixinTickRate() {
         maybeRefresh();
-        return cropMixinTickRate;
+        return enabled ? cropMixinTickRate : MAX_CROP_MIXIN_TICK_RATE;
+    }
+
+    /**
+     * Whether the speedups are currently active. Flipped by {@link #toggleEnabled()} from the client keybinding;
+     * runtime-only state that defaults to enabled on startup.
+     */
+    public static boolean isEnabled() {
+        return enabled;
+    }
+
+    public static void toggleEnabled() {
+        enabled = !enabled;
     }
 
     public Configuration getConfig() {

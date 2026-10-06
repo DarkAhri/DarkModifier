@@ -36,3 +36,5 @@ addon.local.gradle.kts
 addon.late.local.gradle
 addon.late.local.gradle.kts
 layout.json
+/src/main/resources/assets/darkmodifier/pack.mcmeta
+/docs/apiary-cycle-table.md

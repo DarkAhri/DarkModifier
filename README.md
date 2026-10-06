@@ -112,6 +112,14 @@
 - **游戏内 GUI**：主菜单 → `Mods` → 选中 `DarkModifier` → 左下角 `Mod Options`（即时生效）
 - **手工编辑**：修改 cfg 后最多约 5 秒自动生效，无需重启
 
+## 按键绑定
+
+主菜单 → `选项` → `按键控制`，`DarkModifier` 分类下可重新绑定。
+
+| 功能 | 默认按键 | 说明 |
+|:---|:---|:---|
+| 切换加速开关 | `'`（单引号） | 关闭后蜂箱与作物恢复原版速度，再次按下恢复加速。仅运行期有效，重启游戏后默认开启；切换时聊天栏提示当前状态 |
+
 <details>
 <summary><b>安装</b></summary>
 
@@ -239,6 +247,14 @@ Two ways to edit:
 
 - **In-game GUI**: Main menu → `Mods` → select `DarkModifier` → `Mod Options` at the bottom left (applies instantly)
 - **Manual editing**: changes take effect within ~5 seconds after saving the cfg, no restart needed
+
+## Keybinding
+
+Main menu → `Options` → `Controls`, rebindable under the `DarkModifier` category.
+
+| Action | Default key | Notes |
+|:---|:---|:---|
+| Toggle speedups | `'` (apostrophe) | Disabling restores vanilla production speeds for bees and crops; press again to re-enable. Runtime-only — the mod starts enabled after a restart. The current state is announced in chat on each toggle |
 
 <details>
 <summary><b>Installation</b></summary>
